@@ -1,12 +1,30 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React from 'react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import IssueForm from '@/components/IssueForm';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      
+      <main className="flex-grow py-8">
+        <div className="container-custom">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-3">Report an Issue</h2>
+              <p className="text-gray-600">
+                Having a problem with your rental property? Use this form to report any issues.
+              </p>
+            </div>
+            
+            <IssueForm />
+          </div>
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };
