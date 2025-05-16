@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { AlertCircle, ArrowRight, Upload, X } from 'lucide-react';
+import { AlertCircle, ArrowRight, Upload, X, Check, MessageCircle } from 'lucide-react';
 import EmergencyBanner from './EmergencyBanner';
 import TroubleshootingGuide from './TroubleshootingGuide';
+import AIConversation from './AIConversation';
 
 // List of emergency keywords to watch for
 const EMERGENCY_KEYWORDS = ['gas', 'fire', 'flood', 'smoke', 'electrical', 'burst', 'leak'];
@@ -23,9 +23,27 @@ const ISSUE_CATEGORIES = [
   { id: 'other', name: 'Other Issue', pdfUrl: null },
 ];
 
+// Room types for categorization
+const ROOM_TYPES = [
+  'General',
+  'Bathroom',
+  'Kitchen',
+  'Living Room',
+  'Utility Room',
+  'Dining Room',
+  'Bedroom',
+  'Guest Room',
+  'Outdoor',
+  'Communal',
+  'Cellar',
+  'Hallway',
+  'Storage',
+  'Attic',
+];
+
 const IssueForm = () => {
   // Form steps
-  const [step, setStep] = useState<'description' | 'category' | 'guide' | 'details' | 'submitted'>('description');
+  const [step, setStep] = useState<'description' | 'ai-conversation' | 'category' | 'guide' | 'details' | 'submitted'>('description');
   
   // Form data
   const [description, setDescription] = useState('');
@@ -35,11 +53,17 @@ const IssueForm = () => {
   const [phone, setPhone] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState('General');
   
   // Emergency handling
   const [isEmergency, setIsEmergency] = useState(false);
   const [emergencyType, setEmergencyType] = useState('');
   const [emergencyCallConfirmed, setEmergencyCallConfirmed] = useState(false);
+  
+  // AI conversation state
+  const [isAIAnalyzing, setIsAIAnalyzing] = useState(false);
+  const [aiResponse, setAIResponse] = useState('');
+  const [conversationHistory, setConversationHistory] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
   
   // Guide related state
   const [guideSolvedIssue, setGuideSolvedIssue] = useState<boolean | null>(null);
@@ -95,6 +119,7 @@ const IssueForm = () => {
     console.log("Submitting issue:", {
       description,
       category,
+      room: selectedRoom,
       name,
       email,
       phone,
@@ -106,12 +131,77 @@ const IssueForm = () => {
     }, 1000);
   };
 
+  // Handle AI analysis of the problem description
+  const handleAIAnalysis = () => {
+    if (!description.trim()) {
+      toast.error("Please describe your issue first");
+      return;
+    }
+    
+    setIsAIAnalyzing(true);
+    
+    // Add user message to conversation
+    setConversationHistory(prev => [...prev, {
+      role: 'user',
+      content: description
+    }]);
+    
+    // Simulate AI response - in a real app, this would call an AI API
+    setTimeout(() => {
+      let response = "";
+      
+      if (isEmergency) {
+        response = `I notice you mentioned ${emergencyType.toLowerCase()}. This is potentially dangerous and requires immediate attention. Please call the emergency number ${emergencyNumber} right away.`;
+      } else if (description.toLowerCase().includes('washing machine')) {
+        response = "I see you're having an issue with your washing machine. Is it not turning on, making unusual noises, or leaking water?";
+      } else if (description.toLowerCase().includes('heat') || description.toLowerCase().includes('cold')) {
+        response = "It sounds like you're having a heating issue. Is your heating not working at all, or is it not reaching the desired temperature?";
+      } else if (description.toLowerCase().includes('water') || description.toLowerCase().includes('leak')) {
+        response = "I see there might be a plumbing issue. Can you tell me more about where you're seeing water or leaking?";
+      } else {
+        response = "Thank you for reporting this issue. Could you provide more details about when you first noticed the problem and if it's getting worse?";
+      }
+      
+      // Add AI response to conversation
+      setConversationHistory(prev => [...prev, {
+        role: 'assistant',
+        content: response
+      }]);
+      
+      setAIResponse(response);
+      setIsAIAnalyzing(false);
+      setStep('ai-conversation');
+    }, 1500);
+  };
+
+  // Handle user response to AI
+  const handleUserResponse = (message: string) => {
+    // Add user message to conversation
+    setConversationHistory(prev => [...prev, {
+      role: 'user',
+      content: message
+    }]);
+    
+    // Simulate AI response
+    setTimeout(() => {
+      let response = "Thank you for providing that additional information. Based on what you've shared, I recommend we continue with selecting a category for your issue so we can provide the most relevant assistance.";
+      
+      // Add AI response to conversation
+      setConversationHistory(prev => [...prev, {
+        role: 'assistant',
+        content: response
+      }]);
+      
+      // Move to category selection
+      setStep('category');
+    }, 1500);
+  };
+
   // Handle proceeding to next step
   const handleNextStep = () => {
     if (step === 'description') {
-      if (isEmergency && !emergencyCallConfirmed) {
-        return; // Don't proceed until emergency call is confirmed
-      }
+      handleAIAnalysis();
+    } else if (step === 'ai-conversation') {
       setStep('category');
     } else if (step === 'category') {
       const selectedCategory = ISSUE_CATEGORIES.find(c => c.id === category);
@@ -139,6 +229,7 @@ const IssueForm = () => {
     setStep('description');
     setDescription('');
     setCategory('');
+    setSelectedRoom('General');
     setName('');
     setEmail('');
     setPhone('');
@@ -148,6 +239,8 @@ const IssueForm = () => {
     setEmergencyType('');
     setEmergencyCallConfirmed(false);
     setGuideSolvedIssue(null);
+    setConversationHistory([]);
+    setAIResponse('');
   };
 
   // Render the appropriate step
@@ -157,6 +250,24 @@ const IssueForm = () => {
         return (
           <div className="step-container">
             <h2 className="text-xl font-medium mb-4">Describe your issue</h2>
+            
+            <div className="mb-4">
+              <Label htmlFor="room-type">Which room is affected?</Label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                {ROOM_TYPES.map(room => (
+                  <div
+                    key={room}
+                    className={`border rounded-md p-2 cursor-pointer text-sm transition-colors ${
+                      selectedRoom === room ? 'border-primary bg-primary/5' : 'hover:bg-secondary'
+                    }`}
+                    onClick={() => setSelectedRoom(room)}
+                  >
+                    {room}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
             <div className="mb-4">
               <Label htmlFor="description">What's the problem?</Label>
               <Textarea
@@ -164,7 +275,7 @@ const IssueForm = () => {
                 placeholder="Please describe the issue you're experiencing..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="h-32"
+                className="h-32 mt-2"
               />
             </div>
             
@@ -182,9 +293,24 @@ const IssueForm = () => {
                 disabled={!description || (isEmergency && !emergencyCallConfirmed)}
                 className="flex items-center gap-2"
               >
-                Next <ArrowRight className="h-4 w-4" />
+                <MessageCircle className="h-4 w-4 mr-1" />
+                Get AI Assistance
               </Button>
             </div>
+          </div>
+        );
+        
+      case 'ai-conversation':
+        return (
+          <div className="step-container">
+            <h2 className="text-xl font-medium mb-4">AI Assistance</h2>
+            
+            <AIConversation 
+              conversation={conversationHistory}
+              isLoading={isAIAnalyzing}
+              onSendMessage={handleUserResponse}
+              onContinue={handleNextStep}
+            />
           </div>
         );
         
@@ -207,7 +333,7 @@ const IssueForm = () => {
             </div>
             
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep('description')}>
+              <Button variant="outline" onClick={() => setStep('ai-conversation')}>
                 Back
               </Button>
               <Button
