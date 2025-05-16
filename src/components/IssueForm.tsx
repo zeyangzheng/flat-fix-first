@@ -5,11 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/sonner';
-import { AlertCircle, ArrowRight, Upload, X, Check, Security, Heating } from 'lucide-react';
+import { toast } from 'sonner';
+import { AlertCircle, ArrowRight, Upload, X } from 'lucide-react';
 import EmergencyBanner from './EmergencyBanner';
 import TroubleshootingGuide from './TroubleshootingGuide';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // List of emergency keywords to watch for
 const EMERGENCY_KEYWORDS = ['gas', 'fire', 'flood', 'smoke', 'electrical', 'burst', 'leak'];
@@ -24,38 +23,6 @@ const ISSUE_CATEGORIES = [
   { id: 'other', name: 'Other Issue', pdfUrl: null },
 ];
 
-// Room options
-const ROOM_OPTIONS = [
-  'General',
-  'Bathroom',
-  'Kitchen',
-  'Living Room',
-  'Utility Room',
-  'Dining Room',
-  'Bedroom',
-  'Guest Room',
-  'Outdoor',
-  'Communal',
-  'Cellar',
-  'Hallway',
-  'Storage',
-  'Attic',
-];
-
-// Problem categories from the screenshot
-const PROBLEM_CATEGORIES = [
-  { id: 'security', name: 'Security & Alarms', icon: 'Security' },
-  { id: 'heating', name: 'Heating', icon: 'Heating' },
-  { id: 'internet', name: 'Internet & Cable', icon: 'internet' },
-  { id: 'floors', name: 'Floors, Walls & Ceiling', icon: 'floors' },
-  { id: 'pests', name: 'Pests & Vermin', icon: 'pests' },
-  { id: 'gas', name: 'Gas', icon: 'gas' },
-  { id: 'detectors', name: 'Detectors & Meters', icon: 'detectors' },
-  { id: 'water', name: 'Water & Plumbing', icon: 'water' },
-  { id: 'air-conditioning', name: 'Air Conditioning', icon: 'air-conditioning' },
-  { id: 'electricity', name: 'Electricity', icon: 'electricity' },
-];
-
 const IssueForm = () => {
   // Form steps
   const [step, setStep] = useState<'description' | 'category' | 'guide' | 'details' | 'submitted'>('description');
@@ -63,8 +30,6 @@ const IssueForm = () => {
   // Form data
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [room, setRoom] = useState('General');
-  const [problemCategory, setProblemCategory] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -78,7 +43,6 @@ const IssueForm = () => {
   
   // Guide related state
   const [guideSolvedIssue, setGuideSolvedIssue] = useState<boolean | null>(null);
-  const [hasReadAdvice, setHasReadAdvice] = useState(false);
   
   // Default emergency number - in a real app, this should be configurable
   const emergencyNumber = "911"; // This would be loaded from config/API
@@ -129,15 +93,12 @@ const IssueForm = () => {
     
     // Simulate API call
     console.log("Submitting issue:", {
-      room,
-      problemCategory,
       description,
       category,
       name,
       email,
       phone,
-      image: image?.name || 'No image',
-      hasReadAdvice
+      image: image?.name || 'No image'
     });
 
     setTimeout(() => {
@@ -178,8 +139,6 @@ const IssueForm = () => {
     setStep('description');
     setDescription('');
     setCategory('');
-    setRoom('General');
-    setProblemCategory('');
     setName('');
     setEmail('');
     setPhone('');
@@ -189,7 +148,6 @@ const IssueForm = () => {
     setEmergencyType('');
     setEmergencyCallConfirmed(false);
     setGuideSolvedIssue(null);
-    setHasReadAdvice(false);
   };
 
   // Render the appropriate step
@@ -198,51 +156,12 @@ const IssueForm = () => {
       case 'description':
         return (
           <div className="step-container">
-            <h2 className="text-xl font-medium mb-4">Report an Issue</h2>
-            
+            <h2 className="text-xl font-medium mb-4">Describe your issue</h2>
             <div className="mb-4">
-              <Label htmlFor="room">Which room is this about?</Label>
-              <Select value={room} onValueChange={(value) => setRoom(value)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a room" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROOM_OPTIONS.map((roomOption) => (
-                    <SelectItem key={roomOption} value={roomOption}>
-                      {roomOption}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="mb-4">
-              <Label htmlFor="problem-category">What's the problem?</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-                {PROBLEM_CATEGORIES.map((problem) => (
-                  <div
-                    key={problem.id}
-                    className={`flex items-center p-3 border rounded-md cursor-pointer transition-colors ${
-                      problemCategory === problem.id 
-                        ? 'border-primary bg-primary/5' 
-                        : 'hover:bg-secondary'
-                    }`}
-                    onClick={() => setProblemCategory(problem.id)}
-                  >
-                    <div className="mr-2 text-primary">
-                      {/* The icons would be rendered here if available */}
-                    </div>
-                    <span>{problem.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="mb-4">
-              <Label htmlFor="description">Describe the issue</Label>
+              <Label htmlFor="description">What's the problem?</Label>
               <Textarea
                 id="description"
-                placeholder="Please describe what's happening in detail..."
+                placeholder="Please describe the issue you're experiencing..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="h-32"
@@ -260,7 +179,7 @@ const IssueForm = () => {
             <div className="flex justify-end">
               <Button
                 onClick={handleNextStep}
-                disabled={!description || (isEmergency && !emergencyCallConfirmed) || !problemCategory}
+                disabled={!description || (isEmergency && !emergencyCallConfirmed)}
                 className="flex items-center gap-2"
               >
                 Next <ArrowRight className="h-4 w-4" />
@@ -334,26 +253,13 @@ const IssueForm = () => {
               </div>
             </div>
             
-            <div className="flex items-center gap-2 mt-4">
-              <input
-                type="checkbox"
-                id="read-advice"
-                checked={hasReadAdvice}
-                onChange={() => setHasReadAdvice(!hasReadAdvice)}
-                className="rounded border-gray-300 text-primary focus:ring-primary"
-              />
-              <label htmlFor="read-advice" className="text-sm">
-                I confirm that I have read the relevant advice provided
-              </label>
-            </div>
-            
             <div className="mt-4 flex justify-between">
               <Button variant="outline" onClick={() => setStep('category')}>
                 Back
               </Button>
               <Button
                 onClick={handleNextStep}
-                disabled={guideSolvedIssue === null || !hasReadAdvice}
+                disabled={guideSolvedIssue === null}
               >
                 {guideSolvedIssue ? "Complete" : "Continue to submission"}
               </Button>
