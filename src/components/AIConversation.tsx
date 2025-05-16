@@ -2,7 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowRight, MessageCircle, Loader2 } from 'lucide-react';
+import { ArrowRight, MessageCircle, Loader2, ArrowLeft } from 'lucide-react';
+import TroubleshootingGuide from './TroubleshootingGuide';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,14 +14,18 @@ interface AIConversationProps {
   conversation: Message[];
   isLoading: boolean;
   onSendMessage: (message: string) => void;
-  onContinue: () => void;
+  onBack: () => void;
+  selectedCategory?: string;
+  showTroubleshootingGuide?: boolean;
 }
 
 const AIConversation = ({
   conversation,
   isLoading,
   onSendMessage,
-  onContinue
+  onBack,
+  selectedCategory,
+  showTroubleshootingGuide
 }: AIConversationProps) => {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -85,6 +90,15 @@ const AIConversation = ({
         )}
       </div>
 
+      {showTroubleshootingGuide && selectedCategory && (
+        <div className="mb-4">
+          <TroubleshootingGuide 
+            category={selectedCategory || ''}
+            pdfUrl={'/guides/' + selectedCategory?.toLowerCase().replace(/\s+/g, '-') + '.pdf' || ''}
+          />
+        </div>
+      )}
+
       <div className="flex gap-2">
         <Textarea
           value={newMessage}
@@ -107,13 +121,13 @@ const AIConversation = ({
         </Button>
       </div>
 
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-between mt-4">
         <Button 
-          onClick={onContinue} 
-          className="mt-2"
+          onClick={onBack} 
           variant="outline"
+          className="flex items-center gap-2"
         >
-          Continue to Category Selection
+          <ArrowLeft className="h-4 w-4" /> Back
         </Button>
       </div>
     </div>
