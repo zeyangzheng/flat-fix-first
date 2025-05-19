@@ -58,7 +58,7 @@ const JobsList = () => {
             </div>
             
             <div className="flex items-center">
-              {job.status === 'scheduled' ? (
+              {job.status === 'scheduled' || job.status === 'assigned' ? (
                 <Button variant="outline">Mark Complete</Button>
               ) : (
                 <Button>Schedule Visit</Button>

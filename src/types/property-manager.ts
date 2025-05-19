@@ -25,7 +25,7 @@ export interface PropertyManager {
   activeIssues: number;
 }
 
-export type IssueStatus = 'pending' | 'acknowledged' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+export type IssueStatus = 'pending' | 'acknowledged' | 'assigned' | 'in_progress' | 'completed' | 'cancelled' | 'scheduled';
 
 export type IssuePriority = 'urgent' | 'high' | 'normal' | 'low';
 

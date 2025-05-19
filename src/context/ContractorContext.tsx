@@ -119,7 +119,7 @@ export const ContractorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const scheduleJob = (jobId: string, date: Date, slot: TimeSlot) => {
     setJobs(prev => prev.map(job => 
       job.id === jobId 
-        ? { ...job, scheduledDate: date, timeSlot: slot, status: 'scheduled' }
+        ? { ...job, scheduledDate: date, timeSlot: slot, status: 'scheduled' as const }
         : job
     ));
     
@@ -131,7 +131,7 @@ export const ContractorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const completeJob = (jobId: string) => {
     setJobs(prev => prev.map(job => 
       job.id === jobId 
-        ? { ...job, status: 'completed' }
+        ? { ...job, status: 'completed' as const }
         : job
     ));
     
