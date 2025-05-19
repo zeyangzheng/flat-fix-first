@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -88,6 +87,12 @@ const IssueForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (!name || !email) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    
     // In a real app, this would send data to your API
     toast.success("Issue submitted successfully!");
     
@@ -108,12 +113,22 @@ const IssueForm = () => {
 
   // Handle proceeding to next step
   const handleNextStep = () => {
+    if (step === 'description' && description.trim() === '') {
+      toast.error("Please describe your issue");
+      return;
+    }
+    
     if (step === 'description') {
       if (isEmergency && !emergencyCallConfirmed) {
         return; // Don't proceed until emergency call is confirmed
       }
       setStep('category');
     } else if (step === 'category') {
+      if (!category) {
+        toast.error("Please select a category");
+        return;
+      }
+      
       const selectedCategory = ISSUE_CATEGORIES.find(c => c.id === category);
       if (selectedCategory && selectedCategory.pdfUrl) {
         setStep('guide');
@@ -125,6 +140,26 @@ const IssueForm = () => {
         setStep('submitted');
       } else {
         setStep('details');
+      }
+    }
+  };
+
+  // Handle going back to previous step
+  const handlePreviousStep = () => {
+    if (step === 'category') {
+      setStep('description');
+    } else if (step === 'guide') {
+      setStep('category');
+    } else if (step === 'details') {
+      if (category) {
+        const selectedCategory = ISSUE_CATEGORIES.find(c => c.id === category);
+        if (selectedCategory && selectedCategory.pdfUrl && guideSolvedIssue === false) {
+          setStep('guide');
+        } else {
+          setStep('category');
+        }
+      } else {
+        setStep('category');
       }
     }
   };
@@ -207,7 +242,7 @@ const IssueForm = () => {
             </div>
             
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep('description')}>
+              <Button variant="outline" onClick={handlePreviousStep}>
                 Back
               </Button>
               <Button
@@ -254,7 +289,7 @@ const IssueForm = () => {
             </div>
             
             <div className="mt-4 flex justify-between">
-              <Button variant="outline" onClick={() => setStep('category')}>
+              <Button variant="outline" onClick={handlePreviousStep}>
                 Back
               </Button>
               <Button
@@ -308,20 +343,25 @@ const IssueForm = () => {
                 </div>
                 
                 <div>
-                  <Label htmlFor="image">Upload Image (Optional)</Label>
+                  <Label htmlFor="imageUpload">Upload Image (Optional)</Label>
                   <div className="mt-1">
                     {!imagePreview ? (
-                      <div className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center">
+                      <div className="relative border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center">
                         <Upload className="h-8 w-8 text-gray-400 mb-2" />
                         <p className="text-sm text-gray-500 mb-2">Click to upload or drag and drop</p>
                         <input
-                          id="image"
+                          id="imageUpload"
                           type="file"
                           accept="image/*"
                           onChange={handleImageChange}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         />
-                        <Button variant="outline" type="button" className="relative z-10">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          className="relative z-10"
+                          onClick={() => document.getElementById('imageUpload')?.click()}
+                        >
                           Select Image
                         </Button>
                       </div>
@@ -333,6 +373,7 @@ const IssueForm = () => {
                           className="mt-2 max-w-full h-auto rounded-md max-h-36 object-contain"
                         />
                         <Button
+                          type="button"
                           variant="destructive"
                           size="icon"
                           className="absolute top-2 right-2 h-6 w-6"
@@ -350,7 +391,7 @@ const IssueForm = () => {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setStep('category')}
+                  onClick={handlePreviousStep}
                 >
                   Back
                 </Button>

@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ContractorDashboard from '@/components/contractor/ContractorDashboard';
+import { ContractorProvider } from '@/context/ContractorContext';
 
 const Contractor = () => {
   return (
@@ -19,7 +20,9 @@ const Contractor = () => {
               </p>
             </div>
             
-            <ContractorDashboard />
+            <ContractorProvider>
+              <ContractorDashboard />
+            </ContractorProvider>
           </div>
         </div>
       </main>
