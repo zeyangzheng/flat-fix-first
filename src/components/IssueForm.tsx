@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,8 +44,8 @@ const IssueForm = () => {
   // Guide related state
   const [guideSolvedIssue, setGuideSolvedIssue] = useState<boolean | null>(null);
   
-  // Default emergency number - in a real app, this should be configurable
-  const emergencyNumber = "911"; // This would be loaded from config/API
+  // Default emergency number - UK emergency number
+  const emergencyNumber = "999"; // UK emergency number
   
   // Check for emergency keywords in the description
   useEffect(() => {

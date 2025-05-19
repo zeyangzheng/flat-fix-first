@@ -27,7 +27,7 @@ const EmergencyBanner = ({ emergencyType, emergencyNumber, onConfirmed }: Emerge
             This is an urgent issue that requires immediate attention for your safety.
           </p>
           <p className="font-bold">
-            Please call emergency number: <a href={`tel:${emergencyNumber}`} className="underline">{emergencyNumber}</a>
+            Please call UK emergency number: <a href={`tel:${emergencyNumber}`} className="underline">{emergencyNumber}</a>
           </p>
         </div>
       </div>
