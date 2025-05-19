@@ -21,7 +21,7 @@ export interface Job {
   address: string;
   urgency: 'high' | 'normal' | 'low';
   category: 'plumbing' | 'electrical' | 'hvac' | 'maintenance' | 'other';
-  status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
+  status: 'pending' | 'acknowledged' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
   createdAt: Date;
   scheduledDate: Date | null;
   timeSlot: TimeSlot;
